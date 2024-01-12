@@ -2,6 +2,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 class Server  {
@@ -42,7 +43,25 @@ class Server  {
                             clientOut.write("430 Invalid username & password\r\n".getBytes());
                         }
                         break;
-
+                    case "GET":
+                        System.out.println(input);
+                        break;
+                    case "SIZE":
+                        System.out.println("size returned");
+                        clientOut.write("300 accepted.\r\n".getBytes());
+                        break;
+                    case "EPSV":
+                        System.out.println("Entering Extended Passive Mode");
+                        clientOut.write("229 Entering Extended Passive Mode (|||2122|).\r\n".getBytes());
+                        break;
+                    case "EPRT":
+                        int portDonnee = 2122;
+                        ServerSocket dataPort = new ServerSocket(portDonnee);
+                        System.out.println("Entering Extended Passive Mode");
+                        dataPort.accept();
+                        dataPort.accept().getOutputStream().write("hhh".getBytes(StandardCharsets.UTF_8));
+                        dataPort.close();
+                        break;
                     case "QUIT":
                         System.out.println(input);
                         client.close();
@@ -50,7 +69,7 @@ class Server  {
                         System.exit(0);
                     default:
                         clientOut.write("500 Command not implemented.\r\n".getBytes());
-                        System.out.println(input);
+                        System.out.println(input+" 500 Command not implemented.");
                         break;
                 }
             }
