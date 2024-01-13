@@ -1,5 +1,4 @@
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +12,7 @@ class Server  {
             ServerSocket server = new ServerSocket(port);
             System.out.println("Démarrage du serveur sur 127.0.0.1:"+port+".\r\nAttente d’une connexion...");
 
+            Socket dataTransferSocket = null;
             Socket client = server.accept();
             OutputStream clientOut = client.getOutputStream();
             InputStream clientInput = client.getInputStream();
@@ -44,23 +44,64 @@ class Server  {
                         }
                         break;
                     case "GET":
-                        System.out.println(input);
+                        System.out.println("GET message requested");
                         break;
                     case "SIZE":
-                        System.out.println("size returned");
-                        clientOut.write("300 accepted.\r\n".getBytes());
+                        System.out.println(input);
+                        final File f = new File("./filesToSend");
+                        clientOut.write(("226 "+f.length()+".\r\n").getBytes());
                         break;
-                    case "EPSV":
-                        System.out.println("Entering Extended Passive Mode");
-                        clientOut.write("229 Entering Extended Passive Mode (|||2122|).\r\n".getBytes());
+                    case "PORT":
+                        String addressString = input.split(" ")[1];
+                        final String[] addressArray = addressString.split(",");
+                        if (addressArray.length != 6) {
+                            clientOut.write("425 Can't open data connection.\r\n".getBytes(StandardCharsets.UTF_8));
+                            return;
+                        }
+                        final String address = addressArray[0] + "." + addressArray[1]
+                                + "." + addressArray[2] + "." + addressArray[3];
+                        final int dataPort = Integer.parseInt(addressArray[4]) * 256
+                                + Integer.parseInt(addressArray[5]);
+
+                        try {
+                            dataTransferSocket =
+                                    new Socket(address, dataPort);
+                            clientOut.write("227 Entering Active Mode\r\n".getBytes(StandardCharsets.UTF_8));
+                        } catch (final IOException e) {
+                            throw new Exception(
+                                    "Unable to create TransferServer active mode", e);
+                        }
                         break;
-                    case "EPRT":
-                        int portDonnee = 2122;
-                        ServerSocket dataPort = new ServerSocket(portDonnee);
-                        System.out.println("Entering Extended Passive Mode");
-                        dataPort.accept();
-                        dataPort.accept().getOutputStream().write("hhh".getBytes(StandardCharsets.UTF_8));
-                        dataPort.close();
+                    case "RETR":
+                        String fileName = input.split(" ")[1];
+                        if(dataTransferSocket==null){
+                            clientOut.write("443 No data connection\r\n".getBytes(StandardCharsets.UTF_8));
+                        }else{
+                            clientOut.write("150 Accepted data connection\r\n".getBytes(StandardCharsets.UTF_8));
+                            try(final FileInputStream fileInputStream =
+                                        new FileInputStream("/home/latif/Desktop/TP-CAR/TP1-Intellij/src/filesToSend/"+fileName);) {
+
+                                final BufferedOutputStream outBuffer = new BufferedOutputStream(
+                                        dataTransferSocket.getOutputStream());
+
+                                final byte[] buffer = new byte[512];
+                                int l;
+                                while ((l = fileInputStream.read(buffer)) > 0) {
+                                    outBuffer.write(buffer, 0, l);
+                                }
+                                // Flush data
+                                outBuffer.flush();
+
+                                // Close the connection
+                                dataTransferSocket.close();
+                                clientOut.write("226 File successfully transferred\r\n".getBytes(
+                                        StandardCharsets.UTF_8));
+                            } catch (final IOException e) {
+                                clientOut.write("426 Unable to send file\r\n".getBytes(
+                                        StandardCharsets.UTF_8));
+                                throw new Exception(e.getMessage());
+                            }
+                        }
                         break;
                     case "QUIT":
                         System.out.println(input);
@@ -69,11 +110,11 @@ class Server  {
                         System.exit(0);
                     default:
                         clientOut.write("500 Command not implemented.\r\n".getBytes());
-                        System.out.println(input+" 500 Command not implemented.");
+                        System.out.println(input+"----");
                         break;
                 }
             }
-        }catch(Exception e){
+        }catch(Throwable e){
             System.out.println(e.getMessage());
         }
 
