@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Scanner;
 
@@ -35,10 +36,10 @@ class Server {
             clientInput = client.getInputStream();
             Scanner scanner = new Scanner(clientInput);
 
-            //implementing multithreading support soon
-            //ExecutorService executor = Executors.newFixedThreadPool(5);
+            // implementing multithreading support soon
+            // ExecutorService executor = Executors.newFixedThreadPool(5);
 
-            //send to client that it is ready
+            // send to client that it is ready
             clientOut.write("220 service ready\n".getBytes());
             while (true) {
                 input = scanner.nextLine();
@@ -56,8 +57,8 @@ class Server {
     }
 
     private void methods(String input) throws Exception {
-        //TODO: implement isLoggedIn in all functions, allow anonymous ?
-        //TODO: implement dir
+        // TODO: implement isLoggedIn in all functions, allow anonymous ?
+        // TODO: implement dir
         System.out.println(input);
         switch (input.split(" ")[0]) {
             case "USER":
@@ -78,7 +79,8 @@ class Server {
                 break;
             case "PORT":
                 String addressString = input.split(" ")[1];
-                if (setDataPort(addressString)) return;
+                if (setDataPort(addressString))
+                    return;
                 break;
             case "RETR":
                 String fileName = input.split(" ")[1];
@@ -121,8 +123,11 @@ class Server {
             this.sendMessage("443 No data connection");
         } else {
             this.sendMessage("150 Accepted data connection");
-            try (final FileInputStream fileInputStream =
-                         new FileInputStream("/home/latif/Desktop/TP-CAR/TP1-Intellij/src/filesToSend/" + fileName);) {
+            // recup la current path
+            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+            try (final FileInputStream fileInputStream = new FileInputStream(
+                    currentDirectoryName + "/filesToSend/" + fileName);) {
 
                 final BufferedOutputStream outBuffer = new BufferedOutputStream(
                         dataTransferSocket.getOutputStream());
