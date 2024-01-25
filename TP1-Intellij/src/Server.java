@@ -17,6 +17,7 @@ class Server {
     String username = "";
     String pwd = "";
     String input;
+    String cwd = "";
 
     void start_server() throws IOException {
         server = new ServerSocket(port);
@@ -82,6 +83,9 @@ class Server {
                 if (setDataPort(addressString))
                     return;
                 break;
+            case "CWD":
+                this.cd(input.split(" ")[1]);
+                break;
             case "RETR":
                 String fileName = input.split(" ")[1];
                 sendFile(fileName);
@@ -103,6 +107,39 @@ class Server {
                 System.out.println("[" + input + "]: not implemented");
                 break;
         }
+    }
+
+    private String getCurrentPath() {
+        final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+        String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+        return currentDirectoryName;
+    }
+
+    private void cd(String string) {
+
+        switch (string) {
+            case "..":
+
+                break;
+            case "/":
+                break;
+            default:
+                final File folder = new File(
+                        getCurrentPath() + "/TP1-Intellij/src/filesToSend/" + cwd);
+                try {
+                    if (folder.exists() && folder.isDirectory()) {
+
+                        this.sendMessage("226 Changed working directory to " + cwd);
+
+                    } else {
+                        this.sendMessage("510 " + cwd + " is not a directory");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+
     }
 
     private boolean setDataPort(String addressString) throws Exception {
