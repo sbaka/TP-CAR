@@ -86,6 +86,13 @@ class Server {
                 String fileName = input.split(" ")[1];
                 sendFile(fileName);
                 break;
+            case "LIST":
+                if (input.split(" ").length == 2) {
+                    listFileContent(input.split(" ")[1]);
+                } else {
+                    listFileContent();
+                }
+                break;
             case "QUIT":
                 System.out.println(input);
                 client.close();
@@ -118,16 +125,83 @@ class Server {
         return false;
     }
 
+    void listFileContent() throws Exception {
+        if (dataTransferSocket == null) {
+            this.sendMessage("443 No data connection");
+        } else {
+            this.sendMessage("150 Accepted data connection");
+            // récup la current path
+            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+            final File filesToSendFolder = new File(
+                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/");
+            final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
+            if (filesToSendFolder.listFiles().length > 0) {
+                dataOutputStream.write("files at /filesToSend/: \n".getBytes());
+                for (File file : filesToSendFolder.listFiles()) {
+                    dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
+                }
+            } else {
+                this.sendMessage("510 No files in the current directory");
+            }
+            // clear remaining data if there is any
+            dataOutputStream.flush();
+            // close output
+            dataOutputStream.close();
+            // close data socket
+            dataTransferSocket.close();
+            // success message
+            this.sendMessage("226 Current directory content sent");
+        }
+    }
+
+    void listFileContent(String folderName) throws Exception {
+        if (dataTransferSocket == null) {
+            this.sendMessage("443 No data connection");
+        } else {
+            this.sendMessage("150 Accepted data connection");
+            // récup la current path
+            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+            final File folder = new File(
+                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/" + folderName);
+            if (folder.exists()) {
+                if (folder.isDirectory()) {
+                    final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
+                    if (folder.listFiles().length > 0) {
+                        dataOutputStream.write("files at /filesToSend/: \n".getBytes());
+                        for (File file : folder.listFiles()) {
+                            dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
+                        }
+                        // clear remaining data if there is any
+                        dataOutputStream.flush();
+                        dataOutputStream.close();
+                    } else {
+                        this.sendMessage("510 is not a dir");
+                    }
+                } else {
+                    this.sendMessage("510 No files in the specified directory");
+                }
+            } else {
+                this.sendMessage("510 file doesn't exist");
+            }
+            // close data socket
+            dataTransferSocket.close();
+            // success message
+            this.sendMessage("226 Current directory content sent");
+        }
+    }
+
     void sendFile(String fileName) throws Exception {
         if (dataTransferSocket == null) {
             this.sendMessage("443 No data connection");
         } else {
             this.sendMessage("150 Accepted data connection");
-            // recup la current path
+            // récup la current path
             final Path currentDirectorPath = FileSystems.getDefault().getPath("");
             String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
             try (final FileInputStream fileInputStream = new FileInputStream(
-                    currentDirectoryName + "/filesToSend/" + fileName);) {
+                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/" + fileName);) {
 
                 final BufferedOutputStream outBuffer = new BufferedOutputStream(
                         dataTransferSocket.getOutputStream());
