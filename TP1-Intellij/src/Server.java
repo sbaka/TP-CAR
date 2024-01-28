@@ -4,7 +4,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Stack;
 
 class Server {
     int port = 2121;
@@ -17,17 +20,21 @@ class Server {
     String username = "";
     String pwd = "";
     String input;
-    String cwd = "";
-
-    void start_server() throws IOException {
-        server = new ServerSocket(port);
-        System.out.println("Démarrage du serveur sur 127.0.0.1:" + port + ".\r\nAttente d’une connexion...");
-        run();
-    }
+    Stack<String> dirHistory = new Stack<String>();
+    String cwd = "/TP1-Intellij/src/filesToSend/";
+    String startingWd = "/TP1-Intellij/src/filesToSend/";
 
     public static void main(String[] args) throws IOException {
         Server server = new Server();
         server.start_server();
+    }
+
+    void start_server() throws IOException {
+        server = new ServerSocket(port);
+        System.out.println("Démarrage du serveur sur 127.0.0.1:" +
+                port +
+                ".\nAttente d’une connexion...");
+        run();
     }
 
     public void run() {
@@ -110,36 +117,61 @@ class Server {
     }
 
     private String getCurrentPath() {
+        /* get the absolute path of the current working directory */
         final Path currentDirectorPath = FileSystems.getDefault().getPath("");
         String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
         return currentDirectoryName;
     }
 
-    private void cd(String string) {
-
+    private void cd(String string) throws Exception {
+        /*
+         * handles the cd commande:
+         * -cd <filename>: navigates to <filename if it's a directory
+         * -cd ..: goes back one step
+         * -cd /: goes straight to root
+         */
         switch (string) {
             case "..":
-
+                // go back one step
+                if (!dirHistory.empty()) {
+                    dirHistory.pop();
+                    cwd = startingWd + printCDHistory();
+                    this.sendMessage("226 Changed working directory, current path ." + printCDHistory());
+                } else {
+                    this.sendMessage("510 already in root directory, current path ." + printCDHistory());
+                }
                 break;
             case "/":
+                dirHistory.clear();
+                cwd = startingWd;
+                this.sendMessage("226 Changed working directory, current path ." + printCDHistory());
+                // go to root
                 break;
             default:
-                final File folder = new File(
-                        getCurrentPath() + "/TP1-Intellij/src/filesToSend/" + cwd);
-                try {
-                    if (folder.exists() && folder.isDirectory()) {
-
-                        this.sendMessage("226 Changed working directory to " + cwd);
-
-                    } else {
-                        this.sendMessage("510 " + cwd + " is not a directory");
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                final File folder = new File(getCurrentPath() + cwd + string);
+                // test if path is a directory
+                if (folder.exists() && folder.isDirectory()) {
+                    cwd += string + "/";
+                    dirHistory.addAll(Arrays.asList(string.split("/")));
+                    this.sendMessage("226 Changed working directory, current path ." + printCDHistory());
+                } else {
+                    this.sendMessage("510 " + string + " is not a directory or it doesn't exist");
                 }
                 break;
         }
+        // printing current navigation stack
+        System.out.println("navigation stack: " + dirHistory);
 
+    }
+
+    private String printCDHistory() {
+        String temp = "/";
+        if (!dirHistory.isEmpty()) {
+            for (String elString : dirHistory) {
+                temp += elString + "/";
+            }
+        }
+        return temp;
     }
 
     private boolean setDataPort(String addressString) throws Exception {
@@ -162,65 +194,76 @@ class Server {
         return false;
     }
 
-    void listFileContent() throws Exception {
-        if (dataTransferSocket == null) {
-            this.sendMessage("443 No data connection");
-        } else {
-            this.sendMessage("150 Accepted data connection");
-            // récup la current path
-            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
-            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
-            final File filesToSendFolder = new File(
-                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/");
-            final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
-            if (filesToSendFolder.listFiles().length > 0) {
-                dataOutputStream.write("files at /filesToSend/: \n".getBytes());
-                for (File file : filesToSendFolder.listFiles()) {
-                    dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
-                }
-            } else {
-                this.sendMessage("510 No files in the current directory");
-            }
-            // clear remaining data if there is any
-            dataOutputStream.flush();
-            // close output
-            dataOutputStream.close();
-            // close data socket
-            dataTransferSocket.close();
-            // success message
-            this.sendMessage("226 Current directory content sent");
-        }
-    }
+    // void listFileContent() throws Exception {
+    // if (dataTransferSocket == null) {
+    // this.sendMessage("443 No data connection");
+    // } else {
+    // this.sendMessage("150 Accepted data connection");
+    // // récup la current path
+    // final File filesToSendFolder = new File(
+    // getCurrentPath() + cwd);
+    // final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
+    // if (filesToSendFolder.listFiles().length > 0) {
+    // dataOutputStream.write("files at /filesToSend/: \n".getBytes());
+    // for (File file : filesToSendFolder.listFiles()) {
+    // dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
+    // }
+    // } else {
+    // this.sendMessage("510 No files in " + cwd);
+    // }
+    // // clear remaining data if there is any
+    // dataOutputStream.flush();
+    // // close output
+    // dataOutputStream.close();
+    // // close data socket
+    // dataTransferSocket.close();
+    // // success message
+    // this.sendMessage("226 Current directory content sent");
+    // }
+    // }
 
-    void listFileContent(String folderName) throws Exception {
+    void listFileContent(String... folderName) throws Exception {
         if (dataTransferSocket == null) {
             this.sendMessage("443 No data connection");
         } else {
             this.sendMessage("150 Accepted data connection");
-            // récup la current path
-            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
-            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
-            final File folder = new File(
-                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/" + folderName);
-            if (folder.exists()) {
-                if (folder.isDirectory()) {
-                    final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
-                    if (folder.listFiles().length > 0) {
-                        dataOutputStream.write("files at /filesToSend/: \n".getBytes());
-                        for (File file : folder.listFiles()) {
+            final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
+            // checks if there is foldername specified
+            if (folderName.length == 0) {
+                final File currentFolder = new File(getCurrentPath() + cwd);
+                if (currentFolder.exists() && currentFolder.isDirectory()) {
+                    if (currentFolder.listFiles().length > 0) {
+                        dataOutputStream.write(("files at " + printCDHistory() + " \n").getBytes());
+                        for (File file : currentFolder.listFiles()) {
                             dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
                         }
-                        // clear remaining data if there is any
-                        dataOutputStream.flush();
-                        dataOutputStream.close();
                     } else {
-                        this.sendMessage("510 is not a dir");
+                        this.sendMessage("510 No files in " + cwd);
                     }
                 } else {
-                    this.sendMessage("510 No files in the specified directory");
+                    this.sendMessage("510 Not a dir " + getCurrentPath() + cwd);
                 }
             } else {
-                this.sendMessage("510 file doesn't exist");
+                final File folder = new File(getCurrentPath() + cwd + folderName[0]);
+                if (folder.exists()) {
+                    if (folder.isDirectory()) {
+                        if (folder.listFiles().length > 0) {
+                            dataOutputStream.write("files at /filesToSend/: \n".getBytes());
+                            for (File file : folder.listFiles()) {
+                                dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
+                            }
+                            // clear remaining data if there is any
+                            dataOutputStream.flush();
+                            dataOutputStream.close();
+                        } else {
+                            this.sendMessage("510 No files in the specified directory");
+                        }
+                    } else {
+                        this.sendMessage("510 " + folderName[0] + "is not a dir");
+                    }
+                } else {
+                    this.sendMessage("510" + folderName[0] + " doesn't exist");
+                }
             }
             // close data socket
             dataTransferSocket.close();
