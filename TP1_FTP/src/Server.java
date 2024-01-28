@@ -20,8 +20,8 @@ class Server {
     String pwd = "";
     String input;
     Stack<String> dirHistory = new Stack<String>();
-    String cwd = "/TP1/src/filesToSend/";
-    String startingWd = "/TP1/src/filesToSend/";
+    String cwd = "/src/filesToSend/";
+    String startingWd = "/src/filesToSend/";
 
     public static void main(String[] args) throws IOException {
         Server server = new Server();
@@ -246,7 +246,8 @@ class Server {
                         this.sendMessage("510 No files in " + cwd);
                     }
                 } else {
-                    this.sendMessage("510 Not a dir " + getCurrentPath() + cwd);
+                    System.out.println(cwd);
+                    this.sendMessage("510 Not a dir " + getCurrentPath());
                 }
             } else {
                 final File folder = new File(getCurrentPath() + cwd + folderName[0]);

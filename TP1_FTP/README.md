@@ -14,11 +14,10 @@ Réaliser un serveur FTP en JAVA, le serveur doit pouvoir communiquer avec un cl
 | PASS        | password    | Défini le mot de passe du client                                                                    |
 | QUIT        |             | Ferme la connexion                                                                                  |
 | SYST        |             | Indique le type de système utilisé par le serveur (UNIX Type: L8)                                   |
-| PWD         |             | Retourne le chemin du répertoire de travail courant                                                 |
 | CWD         | path        | Change le répertoire du travail                                                                     |
 | PORT        | a,b,c,d,i,p | Indique au serveur l'adresse du socket de données (mode actif)                                      |
-| PASV        |             | Demande au serveur de créer un socket de données (le port est envoyé dans la réponse) (mode passif) |
-| EPSV        |             | Demande au serveur de créer un socket de données (le port est envoyé dans la réponse) (mode passif) |
+| PASV(todo)  |             | Demande au serveur de créer un socket de données (le port est envoyé dans la réponse) (mode passif) |
+| EPSV(todo)  |             | Demande au serveur de créer un socket de données (le port est envoyé dans la réponse) (mode passif) |
 | LIST        | [path]      | Liste le contenu d'un répertoire (données envoyées sur le socket de données)                        |
 | SIZE        | path        | Retourne la taille du fichier                                                                       |
 | RETR        | path        | Récupérer le contenu du fichier (données envoyées sur le socket de données)                         |
