@@ -4,7 +4,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Stack;
@@ -21,8 +20,8 @@ class Server {
     String pwd = "";
     String input;
     Stack<String> dirHistory = new Stack<String>();
-    String cwd = "/TP1-Intellij/src/filesToSend/";
-    String startingWd = "/TP1-Intellij/src/filesToSend/";
+    String cwd = "/TP1/src/filesToSend/";
+    String startingWd = "/TP1/src/filesToSend/";
 
     public static void main(String[] args) throws IOException {
         Server server = new Server();
@@ -65,10 +64,16 @@ class Server {
     }
 
     private void methods(String input) throws Exception {
+        /*
+         * Handles the commandes sent to the server, maps each commande to its function
+         */
         // TODO: implement isLoggedIn in all functions, allow anonymous ?
         // TODO: implement dir
         System.out.println(input);
         switch (input.split(" ")[0]) {
+            case "PWD":
+                sendMessage("226 current path ." + printCDHistory());
+                break;
             case "USER":
                 username = input.split(" ")[1];
                 sendMessage("331 User name received");
@@ -99,9 +104,9 @@ class Server {
                 break;
             case "LIST":
                 if (input.split(" ").length == 2) {
-                    listFileContent(input.split(" ")[1]);
+                    dir(input.split(" ")[1]);
                 } else {
-                    listFileContent();
+                    dir();
                 }
                 break;
             case "QUIT":
@@ -222,7 +227,7 @@ class Server {
     // }
     // }
 
-    void listFileContent(String... folderName) throws Exception {
+    void dir(String... folderName) throws Exception {
         if (dataTransferSocket == null) {
             this.sendMessage("443 No data connection");
         } else {
@@ -281,7 +286,7 @@ class Server {
             final Path currentDirectorPath = FileSystems.getDefault().getPath("");
             String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
             try (final FileInputStream fileInputStream = new FileInputStream(
-                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/" + fileName);) {
+                    currentDirectoryName + cwd + fileName);) {
 
                 final BufferedOutputStream outBuffer = new BufferedOutputStream(
                         dataTransferSocket.getOutputStream());
