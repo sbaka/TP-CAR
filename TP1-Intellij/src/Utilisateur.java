@@ -2,8 +2,17 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Utilisateur {
-    String username;
-    String password;
+    private String username;
+    private String password;
+    private boolean isLoggedIn;
+
+    public boolean isLoggedIn() {
+        return isLoggedIn;
+    }
+
+    public void setLoggedIn(boolean isLoggedIn) {
+        this.isLoggedIn = isLoggedIn;
+    }
 
     public Utilisateur(String username, String password) {
         this.username = username;

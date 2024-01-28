@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Scanner;
 
@@ -16,6 +17,7 @@ class Server {
     String username = "";
     String pwd = "";
     String input;
+    String cwd = "";
 
     void start_server() throws IOException {
         server = new ServerSocket(port);
@@ -35,10 +37,10 @@ class Server {
             clientInput = client.getInputStream();
             Scanner scanner = new Scanner(clientInput);
 
-            //implementing multithreading support soon
-            //ExecutorService executor = Executors.newFixedThreadPool(5);
+            // implementing multithreading support soon
+            // ExecutorService executor = Executors.newFixedThreadPool(5);
 
-            //send to client that it is ready
+            // send to client that it is ready
             clientOut.write("220 service ready\n".getBytes());
             while (true) {
                 input = scanner.nextLine();
@@ -56,8 +58,8 @@ class Server {
     }
 
     private void methods(String input) throws Exception {
-        //TODO: implement isLoggedIn in all functions, allow anonymous ?
-        //TODO: implement dir
+        // TODO: implement isLoggedIn in all functions, allow anonymous ?
+        // TODO: implement dir
         System.out.println(input);
         switch (input.split(" ")[0]) {
             case "USER":
@@ -78,11 +80,22 @@ class Server {
                 break;
             case "PORT":
                 String addressString = input.split(" ")[1];
-                if (setDataPort(addressString)) return;
+                if (setDataPort(addressString))
+                    return;
+                break;
+            case "CWD":
+                this.cd(input.split(" ")[1]);
                 break;
             case "RETR":
                 String fileName = input.split(" ")[1];
                 sendFile(fileName);
+                break;
+            case "LIST":
+                if (input.split(" ").length == 2) {
+                    listFileContent(input.split(" ")[1]);
+                } else {
+                    listFileContent();
+                }
                 break;
             case "QUIT":
                 System.out.println(input);
@@ -94,6 +107,39 @@ class Server {
                 System.out.println("[" + input + "]: not implemented");
                 break;
         }
+    }
+
+    private String getCurrentPath() {
+        final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+        String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+        return currentDirectoryName;
+    }
+
+    private void cd(String string) {
+
+        switch (string) {
+            case "..":
+
+                break;
+            case "/":
+                break;
+            default:
+                final File folder = new File(
+                        getCurrentPath() + "/TP1-Intellij/src/filesToSend/" + cwd);
+                try {
+                    if (folder.exists() && folder.isDirectory()) {
+
+                        this.sendMessage("226 Changed working directory to " + cwd);
+
+                    } else {
+                        this.sendMessage("510 " + cwd + " is not a directory");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+
     }
 
     private boolean setDataPort(String addressString) throws Exception {
@@ -116,13 +162,83 @@ class Server {
         return false;
     }
 
+    void listFileContent() throws Exception {
+        if (dataTransferSocket == null) {
+            this.sendMessage("443 No data connection");
+        } else {
+            this.sendMessage("150 Accepted data connection");
+            // récup la current path
+            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+            final File filesToSendFolder = new File(
+                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/");
+            final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
+            if (filesToSendFolder.listFiles().length > 0) {
+                dataOutputStream.write("files at /filesToSend/: \n".getBytes());
+                for (File file : filesToSendFolder.listFiles()) {
+                    dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
+                }
+            } else {
+                this.sendMessage("510 No files in the current directory");
+            }
+            // clear remaining data if there is any
+            dataOutputStream.flush();
+            // close output
+            dataOutputStream.close();
+            // close data socket
+            dataTransferSocket.close();
+            // success message
+            this.sendMessage("226 Current directory content sent");
+        }
+    }
+
+    void listFileContent(String folderName) throws Exception {
+        if (dataTransferSocket == null) {
+            this.sendMessage("443 No data connection");
+        } else {
+            this.sendMessage("150 Accepted data connection");
+            // récup la current path
+            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+            final File folder = new File(
+                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/" + folderName);
+            if (folder.exists()) {
+                if (folder.isDirectory()) {
+                    final OutputStream dataOutputStream = dataTransferSocket.getOutputStream();
+                    if (folder.listFiles().length > 0) {
+                        dataOutputStream.write("files at /filesToSend/: \n".getBytes());
+                        for (File file : folder.listFiles()) {
+                            dataOutputStream.write(("\t-" + file.getName() + "\n").getBytes());
+                        }
+                        // clear remaining data if there is any
+                        dataOutputStream.flush();
+                        dataOutputStream.close();
+                    } else {
+                        this.sendMessage("510 is not a dir");
+                    }
+                } else {
+                    this.sendMessage("510 No files in the specified directory");
+                }
+            } else {
+                this.sendMessage("510 file doesn't exist");
+            }
+            // close data socket
+            dataTransferSocket.close();
+            // success message
+            this.sendMessage("226 Current directory content sent");
+        }
+    }
+
     void sendFile(String fileName) throws Exception {
         if (dataTransferSocket == null) {
             this.sendMessage("443 No data connection");
         } else {
             this.sendMessage("150 Accepted data connection");
-            try (final FileInputStream fileInputStream =
-                         new FileInputStream("/home/latif/Desktop/TP-CAR/TP1-Intellij/src/filesToSend/" + fileName);) {
+            // récup la current path
+            final Path currentDirectorPath = FileSystems.getDefault().getPath("");
+            String currentDirectoryName = currentDirectorPath.toAbsolutePath().toString();
+            try (final FileInputStream fileInputStream = new FileInputStream(
+                    currentDirectoryName + "/TP1-Intellij/src/filesToSend/" + fileName);) {
 
                 final BufferedOutputStream outBuffer = new BufferedOutputStream(
                         dataTransferSocket.getOutputStream());
