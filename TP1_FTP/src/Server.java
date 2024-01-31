@@ -95,9 +95,16 @@ class Server {
                 sendMessage(clientOut, ("226 " + f.length()));
                 break;
             // Code à exécuter pour 'PORT' ou 'EPRT'
+            case "EPSV":
+                // Si la commande est EPSV
+                handleEPSV();
+                break;
             case "PORT":
+                if (handlePORT(argument))
+                    return;
+                break;
             case "EPRT":
-                if (setDataPort(command, argument))
+                if (handleEPRT(argument))
                     return;
                 break;
             case "CWD":
@@ -184,62 +191,63 @@ class Server {
         return temp;
     }
 
-    private boolean setDataPort(String command, String addressString) throws Exception {
-        /*
-         * Gère les overture du port de donnée, peu importe le mode
-         */
-        // Si la commande est PORT
-        if (command.equals("PORT")) {
-            // On divise la chaîne d'adresse en tableau
-            final String[] addressArray = addressString.split(",");
-            // Si la longueur du tableau n'est pas 6, on renvoie une erreur
-            if (addressArray.length != 6) {
-                sendMessage(clientOut, "425 Impossible d'ouvrir la connexion de données.");
-                return true;
-            }
-            // On construit l'adresse et le port à partir de la chaîne de caractère
-            final String address = addressArray[0] + "." + addressArray[1]
-                    + "." + addressArray[2] + "." + addressArray[3];
-            final int dataPort = Integer.parseInt(addressArray[4]) * 256
-                    + Integer.parseInt(addressArray[5]);
-            try {
-                // On tente d'ouvrir un socket vers l'adresse et le port spécifiés
-                dataTransferSocket = new Socket(address, dataPort);
-                sendMessage(clientOut, "227 Entrée en mode actif");
-            } catch (final IOException e) {
-                // En cas d'erreur, on lance une exception
-                throw new Exception(
-                        "Impossible de créer le mode actif du serveur de transfert", e);
-            }
-            // Si la commande est EPRT
-        } else if (command.equals("EPRT")) {
-            // On divise la chaîne d'adresse en tableau
-            String[] eprtArgs = addressString.split("\\|");
-            // Si la longueur du tableau n'est pas 4, on renvoie une erreur
-            if (eprtArgs.length != 4) {
-                sendMessage(clientOut, "500 Erreur de syntaxe, commande non reconnue.");
-                return true;
-            }
-            // On extrait le protocole, l'adresse IP et le port du tableau
-            String protocol = eprtArgs[1];
-            String ipAddress = eprtArgs[2];
-            int dataPort = Integer.parseInt(eprtArgs[3]);
-            // Si le protocole est 2 (IPv6) et l'adresse IP est ::1 (localhost)
-            if (protocol.equals("2") && ipAddress.equals("::1")) {
-                try {
-                    // On tente d'ouvrir un socket vers l'adresse et le port spécifiés
-                    dataTransferSocket = new Socket(ipAddress, dataPort);
-                    sendMessage(clientOut, "200 Commande OK.");
-                } catch (final IOException e) {
-                    // En cas d'erreur, on lance une exception
-                    throw new Exception("Impossible de créer le mode actif du serveur de transfert", e);
-                }
-            } else {
-                // Si le protocole n'est pas supporté, on renvoie une erreur
-                sendMessage(clientOut, "522 Protocole non supporté.");
-            }
+    // Gère l'ouverture du port de données pour la commande EPSV
+    private void handleEPSV() throws Exception {
+        try {
+            // On crée un nouveau ServerSocket pour la connexion de données
+            ServerSocket dataServerSocket = new ServerSocket(0);
+            // On récupère le port local du ServerSocket
+            int dataPort = dataServerSocket.getLocalPort();
+            // On envoie le port au client
+            sendMessage(clientOut, "229 Entering Extended Passive Mode (|||" + dataPort + "|)");
+            // On accepte la connexion de données du client
+            dataTransferSocket = dataServerSocket.accept();
+            dataServerSocket.close();
+        } catch (IOException e) {
+            throw new Exception("Unable to create data connection in passive mode", e);
         }
-        // Si tout se passe bien, on renvoie false
+    }
+
+    // Gère l'ouverture du port de données pour la commande PORT
+    private boolean handlePORT(String addressString) throws Exception {
+        final String[] addressArray = addressString.split(",");
+        if (addressArray.length != 6) {
+            sendMessage(clientOut, "425 Impossible d'ouvrir la connexion de données.");
+            return true;
+        }
+        final String address = addressArray[0] + "." + addressArray[1]
+                + "." + addressArray[2] + "." + addressArray[3];
+        final int dataPort = Integer.parseInt(addressArray[4]) * 256
+                + Integer.parseInt(addressArray[5]);
+        try {
+            dataTransferSocket = new Socket(address, dataPort);
+            sendMessage(clientOut, "227 Entrée en mode actif");
+        } catch (final IOException e) {
+            throw new Exception("Impossible de créer le mode actif du serveur de transfert", e);
+        }
+        return false;
+    }
+
+    // Gère l'ouverture du port de données pour la commande EPRT
+    private boolean handleEPRT(String addressString) throws Exception {
+        String[] eprtArgs = addressString.split("\\|");
+        if (eprtArgs.length != 4) {
+            sendMessage(clientOut, "500 Erreur de syntaxe, commande non reconnue.");
+            return true;
+        }
+        String protocol = eprtArgs[1];
+        String ipAddress = eprtArgs[2];
+        int dataPort = Integer.parseInt(eprtArgs[3]);
+        if (protocol.equals("2") && ipAddress.equals("::1")) {
+            try {
+                dataTransferSocket = new Socket(ipAddress, dataPort);
+                sendMessage(clientOut, "200 Commande OK.");
+            } catch (final IOException e) {
+                throw new Exception("Impossible de créer le mode actif du serveur de transfert", e);
+            }
+        } else {
+            sendMessage(clientOut, "522 Protocole non supporté.");
+        }
         return false;
     }
 
@@ -272,15 +280,9 @@ class Server {
                 if (folder.exists()) {
                     if (folder.isDirectory()) {
                         if (folder.listFiles().length > 0) {
-                            sendMessage(dataOutputStream, "files at /filesToSend/: \n");
-                            for (File file : folder.listFiles()) {
-                                sendMessage(dataOutputStream, ("\t-" + file.getName() + "\n"));
-                            }
-                            // clear remaining data if there is any
-                            dataOutputStream.flush();
-                            dataOutputStream.close();
+                            sendMessage(dataOutputStream, fileContent(folder));
                         } else {
-                            this.sendMessage(clientOut, "510 No files in the specified directory");
+                            this.sendMessage(clientOut, "510 No files in " + folder.getAbsolutePath());
                         }
                     } else {
                         this.sendMessage(clientOut, "510 " + folderName[0] + "is not a dir");
