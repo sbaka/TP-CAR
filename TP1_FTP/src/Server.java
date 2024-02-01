@@ -96,6 +96,10 @@ class Server {
                     server.close();
                     System.exit(0);
                     break;
+                case "PING":
+                    sendMessage(clientOut, "200 PING command ok");
+                    sendMessage(clientOut, "PONG");
+                    break;
                 default:
                     sendMessage(clientOut, "530 Not logged in.");
                     break;
@@ -135,7 +139,6 @@ class Server {
                     }
                     break;
                 case "QUIT":
-                    System.out.println(input);
                     client.close();
                     server.close();
                     System.exit(0);

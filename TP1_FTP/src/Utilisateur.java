@@ -29,6 +29,7 @@ public class Utilisateur {
                 new Utilisateur("latif", "123"),
                 new Utilisateur("user", "user"),
                 new Utilisateur("test", "test"),
+                new Utilisateur("miage", "car"),
         };
     }
 
