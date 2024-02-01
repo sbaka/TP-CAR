@@ -74,62 +74,77 @@ class Server {
         System.out.println(input);
         String command = input.split(" ")[0];
         String argument = input.split(" ").length > 1 ? input.split(" ")[1] : "";
-        switch (command) {
-            case "PWD":
-                sendMessage(clientOut, "226 current path ." + printCDHistory());
-                break;
-            case "USER":
-                username = argument;
-                sendMessage(clientOut, "331 User name received");
-                break;
-            case "PASS":
-                pwd = argument;
-                if (Utilisateur.isValidUser(new Utilisateur(username, pwd))) {
-                    this.sendMessage(clientOut, "230 User logged in.");
-                } else {
-                    this.sendMessage(clientOut, "430 Invalid username & password");
-                }
-                break;
-            case "SIZE":
-                final File f = new File(Path.of("./filesToSend").toString());
-                sendMessage(clientOut, ("226 " + f.length()));
-                break;
-            // Code à exécuter pour 'PORT' ou 'EPRT'
-            case "EPSV":
-                // Si la commande est EPSV
-                handleEPSV();
-                break;
-            case "PORT":
-                if (handlePORT(argument))
-                    return;
-                break;
-            case "EPRT":
-                if (handleEPRT(argument))
-                    return;
-                break;
-            case "CWD":
-                this.cd(argument);
-                break;
-            case "RETR":
-                String fileName = argument;
-                sendFile(fileName);
-                break;
-            case "LIST":
-                if (input.split(" ").length == 2) {
-                    dir(argument);
-                } else {
-                    dir();
-                }
-                break;
-            case "QUIT":
-                System.out.println(input);
-                client.close();
-                server.close();
-                System.exit(0);
-            default:
-                sendMessage(clientOut, "500 Command not implemented.");
-                System.out.println("[" + input + "]: not implemented");
-                break;
+
+        if (!isLoggedIn) {
+            switch (command) {
+                case "USER":
+                    username = argument;
+                    sendMessage(clientOut, "331 User name received");
+                    break;
+                case "PASS":
+                    pwd = argument;
+                    if (Utilisateur.isValidUser(new Utilisateur(username, pwd))) {
+                        this.sendMessage(clientOut, "230 User logged in.");
+                        isLoggedIn = true;
+                    } else {
+                        this.sendMessage(clientOut, "430 Invalid username & password");
+                    }
+                    break;
+                case "QUIT":
+                    System.out.println(input);
+                    client.close();
+                    server.close();
+                    System.exit(0);
+                    break;
+                default:
+                    sendMessage(clientOut, "530 Not logged in.");
+                    break;
+            }
+        } else {
+            switch (command) {
+                case "PWD":
+                    sendMessage(clientOut, "226 current path ." + printCDHistory());
+                    break;
+                case "SIZE":
+                    final File f = new File(Path.of("./filesToSend").toString());
+                    sendMessage(clientOut, ("226 " + f.length()));
+                    break;
+                case "EPSV":
+                    handleEPSV();
+                    break;
+                case "PORT":
+                    if (handlePORT(argument))
+                        return;
+                    break;
+                case "EPRT":
+                    if (handleEPRT(argument))
+                        return;
+                    break;
+                case "CWD":
+                    this.cd(argument);
+                    break;
+                case "RETR":
+                    String fileName = argument;
+                    sendFile(fileName);
+                    break;
+                case "LIST":
+                    if (input.split(" ").length == 2) {
+                        dir(argument);
+                    } else {
+                        dir();
+                    }
+                    break;
+                case "QUIT":
+                    System.out.println(input);
+                    client.close();
+                    server.close();
+                    System.exit(0);
+                    break;
+                default:
+                    sendMessage(clientOut, "500 Command not implemented.");
+                    System.out.println("[" + input + "]: not implemented");
+                    break;
+            }
         }
     }
 
@@ -208,6 +223,7 @@ class Server {
         }
     }
 
+    // réponds à la question: est-ce qu'il y a erreur?
     // Gère l'ouverture du port de données pour la commande PORT
     private boolean handlePORT(String addressString) throws Exception {
         final String[] addressArray = addressString.split(",");
