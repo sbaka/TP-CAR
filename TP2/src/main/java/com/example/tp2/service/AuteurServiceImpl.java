@@ -16,9 +16,9 @@ public class AuteurServiceImpl implements AuteurServiceItf {
     }
 
     public void init() {
-        repo.save(new Auteur("nom&", "prenom"));
-        repo.save(new Auteur("nom[]", "prenom"));
-        repo.save(new Auteur("nom()", "prenom"));
+        repo.save(new Auteur("nom1", "prenom1"));
+        repo.save(new Auteur("nom2", "prenom2"));
+        repo.save(new Auteur("nom3", "prenom3"));
 
     }
 
