@@ -1,6 +1,16 @@
 {
     "cmake.configureOnOpen": false,
     "cSpell.words": [
-        "miage"
-    ]
+        "creneaux",
+        "Creneaux",
+        "etat",
+        "evenement",
+        "Evenement",
+        "evenements",
+        "Evenements",
+        "miage",
+        "prenom",
+        "signin"
+    ],
+    "java.compile.nullAnalysis.mode": "automatic"
 }

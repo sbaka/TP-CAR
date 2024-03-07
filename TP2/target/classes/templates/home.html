@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link href="./output.css" rel="stylesheet">
 </head>
 
 <body>
@@ -23,27 +23,9 @@
         </tr>
     </table>
     <br>
-
-    <h3>Ajouter un Auteur</h3>
-    <form action="/bib/add" method="post">
-        <input type="text" placeholder="Nom" name="nom" id="nom">
-        <input type="text" placeholder="Prenom" name="prenom" id="prenom">
-        <input type="submit" value="submit" name="submit">
+    <form action="/bib/init" method="post">
+        <input type="submit" value="init">
     </form>
-    <script>
-        if (window.sessionStorage.getItem("loaded") != 1) {
-            console.log(window.sessionStorage.getItem("loaded"));
-            $(document).ready(function () {
-                $.ajax({
-                    type: "POST",
-                    url: "http://localhost:8080/bib/init",
-                    data: {}
-                });
-            });
-            sessionStorage.setItem("loaded", 1);
-        }
-
-    </script>
 </body>
 
 </html>
