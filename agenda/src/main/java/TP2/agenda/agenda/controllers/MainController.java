@@ -3,17 +3,21 @@ package TP2.agenda.agenda.controllers;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import TP2.agenda.agenda.models.Agenda;
+import TP2.agenda.agenda.models.Evenement;
 import TP2.agenda.agenda.models.Utilisateur;
 import TP2.agenda.agenda.services.AgendaServicesItf;
+import TP2.agenda.agenda.services.EvenementServicesItf;
 import TP2.agenda.agenda.services.UtilisateurServicesItf;
 import jakarta.servlet.http.HttpSession;
 
@@ -25,6 +29,9 @@ public class MainController {
 
     @Autowired
     AgendaServicesItf agendaService;
+
+    @Autowired
+    EvenementServicesItf evenementService;
 
     @PostMapping("/signup")
     public String signup(
@@ -108,6 +115,16 @@ public class MainController {
             model.addAttribute("error", "Problème avec utilisateur = null");
             return "home";
         }
+    }
 
+    @GetMapping("/details/{id}")
+    public String detailAgendaById(HttpSession session, Model model, @PathVariable Long id) {
+        Optional<Agenda> agenda = agendaService.getAgendaById(id);
+
+        model.addAttribute("currentAgenda", agenda.get());
+        List<Evenement> events = evenementService.getAgendasEvents(id);
+        model.addAttribute("events", events);
+
+        return "AgendaDetails";
     }
 }
