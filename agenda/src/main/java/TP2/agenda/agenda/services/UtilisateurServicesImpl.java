@@ -1,11 +1,8 @@
 package TP2.agenda.agenda.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import TP2.agenda.agenda.models.Agenda;
 import TP2.agenda.agenda.models.Utilisateur;
 import TP2.agenda.agenda.repositories.UtilisateurRepository;
 
@@ -26,8 +23,4 @@ public class UtilisateurServicesImpl implements UtilisateurServicesItf {
         return repo.findByEmail(email);
     }
 
-    @Override
-    public List<Agenda> findAllAgenda() {
-        return repo.findAllAgenda();
-    }
 }

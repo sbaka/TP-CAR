@@ -5,6 +5,7 @@ import java.util.Date;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 /**
@@ -12,10 +13,13 @@ import jakarta.persistence.ManyToOne;
  */
 @Entity
 public class Creneau {
-    private long id;
+    @Id
+    @GeneratedValue
+    private Long id;
     private Date date;
 
     @ManyToOne
+    @JoinColumn(name = "evenement_id")
     private Evenement evenement;
 
     public Creneau() {
@@ -25,8 +29,6 @@ public class Creneau {
         this.date = date;
     }
 
-    @Id
-    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -41,5 +43,13 @@ public class Creneau {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public Evenement getEvenement() {
+        return evenement;
+    }
+
+    public void setEvenement(Evenement evenement) {
+        this.evenement = evenement;
     }
 }

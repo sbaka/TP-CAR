@@ -1,7 +1,9 @@
 package TP2.agenda.agenda.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,14 +22,21 @@ public class Utilisateur {
     @Column(unique = true)
     private String email;
     private String pwd;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-    private long id;
+    @OneToMany(mappedBy = "utilisateur", orphanRemoval = true, cascade = CascadeType.REMOVE)
+    private List<Agenda> agenda = new ArrayList<>();
 
-    @OneToMany
-    private List<Agenda> agendas;
+    public Utilisateur(String nom, String prenom, String email, String pwd) {
+        this.nom = nom;
+        this.prenom = prenom;
+        this.email = email;
+        this.pwd = pwd;
+    }
 
-    public List<Agenda> getAgendas() {
-        return agendas;
+    public Utilisateur() {
     }
 
     public String getNom() {
@@ -62,8 +71,6 @@ public class Utilisateur {
         this.email = email;
     }
 
-    @Id
-    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -72,13 +79,12 @@ public class Utilisateur {
         this.id = id;
     }
 
-    public Utilisateur(String nom, String prenom, String email, String pwd) {
-        this.nom = nom;
-        this.prenom = prenom;
-        this.email = email;
-        this.pwd = pwd;
+    public List<Agenda> getAgenda() {
+        return agenda;
     }
 
-    public Utilisateur() {
+    public void setAgenda(List<Agenda> agendas) {
+        this.agenda = agendas;
     }
+
 }

@@ -1,9 +1,12 @@
 package TP2.agenda.agenda.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import TP2.agenda.agenda.models.Agenda;
+import TP2.agenda.agenda.models.Utilisateur;
 import TP2.agenda.agenda.repositories.AgendaRepository;
 
 @Service
@@ -16,6 +19,11 @@ public class AgendaServicesImpl implements AgendaServicesItf {
         if (agenda != null) {
             repo.save(agenda);
         }
+    }
+
+    @Override
+    public List<Agenda> getUserAgenda(Utilisateur utilisateur) {
+        return repo.findByUtilisateur(utilisateur);
     }
 
 }

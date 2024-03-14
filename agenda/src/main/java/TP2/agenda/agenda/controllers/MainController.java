@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import TP2.agenda.agenda.models.Agenda;
@@ -54,10 +57,12 @@ public class MainController {
         Utilisateur currentUser = (Utilisateur) session.getAttribute("currentUser");
         if (currentUser != null) {
             agendaService.add(new Agenda(libelle, currentUser));
+            return "redirect:/agenda/home";
         } else {
             model.addAttribute("error", "Problème avec utilisateur = null");
+            return "home";
         }
-        return "home";
+
     }
 
     @PostMapping("/signin")
@@ -97,7 +102,12 @@ public class MainController {
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
         Utilisateur currentUser = (Utilisateur) session.getAttribute("currentUser");
-        model.addAttribute("agenda", currentUser.getAgendas());
-        return "home";
+        if (currentUser == null) {
+            return "redirect:/agenda/signin";
+        } else {
+            List<Agenda> agendas = agendaService.getUserAgenda(currentUser);
+            model.addAttribute("agenda", agendas);
+            return "home";
+        }
     }
 }

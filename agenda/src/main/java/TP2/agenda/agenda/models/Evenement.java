@@ -1,24 +1,26 @@
 package TP2.agenda.agenda.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 /**
  * Evenements
  */
 @Entity
 public class Evenement {
+    @Id
+    @GeneratedValue
     private long id;
     private String libelle;
+
     @ManyToOne
+    @JoinColumn(name = "agenda_id")
     private Agenda agenda;
-    @OneToMany
-    private List<Creneau> creneaux;
+
+    @OneToMany(mappedBy = "evenement", orphanRemoval = true, cascade = CascadeType.REMOVE)
+    private List<Creneau> creneaux = new ArrayList<>();
 
     public Evenement() {
     }
@@ -27,8 +29,6 @@ public class Evenement {
         this.libelle = libelle;
     }
 
-    @Id
-    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -43,5 +43,21 @@ public class Evenement {
 
     public void setLibelle(String libelle) {
         this.libelle = libelle;
+    }
+
+    public Agenda getAgenda() {
+        return agenda;
+    }
+
+    public void setAgenda(Agenda agenda) {
+        this.agenda = agenda;
+    }
+
+    public List<Creneau> getCreneaux() {
+        return creneaux;
+    }
+
+    public void setCreneaux(List<Creneau> creneaux) {
+        this.creneaux = creneaux;
     }
 }

@@ -1,29 +1,26 @@
 package TP2.agenda.agenda.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 /**
  * Agendas
  */
 @Entity
 public class Agenda {
-    private String libelle;
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private long id;
+    private String libelle;
 
     @ManyToOne
+    @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;
 
-    @OneToMany
-    private List<Evenement> evenements;
+    @OneToMany(mappedBy = "agenda", orphanRemoval = true, cascade = CascadeType.REMOVE)
+    private List<Evenement> evenements = new ArrayList<>();
 
     public Agenda() {
     }
@@ -41,8 +38,6 @@ public class Agenda {
         this.libelle = libelle;
     }
 
-    @Id
-    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -50,4 +45,20 @@ public class Agenda {
     public void setId(long id) {
         this.id = id;
     }
+
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
+    }
+
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
+    }
+
+    // public List<Evenement> getEvenements() {
+    // return evenements;
+    // }
+
+    // public void setEvenements(List<Evenement> evenements) {
+    // this.evenements = evenements;
+    // }
 }
