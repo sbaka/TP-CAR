@@ -28,7 +28,7 @@
     <div>
         <h2>Liste des agendas</h2>
         <ul th:each="agenda : ${agendas}">
-            <li th:text="${agenda.libelle}"></li>
+            <li><a href="" th:text="${agenda.libelle}" name="agenda"></a></li>
         </ul>
     </div>
 </body>

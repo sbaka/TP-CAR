@@ -52,19 +52,6 @@ public class MainController {
         return "redirect:/agenda/signin";
     }
 
-    @PostMapping("/addagenda")
-    public String addAgenda(HttpSession session, Model model, @RequestParam String libelle) {
-        Utilisateur currentUser = (Utilisateur) session.getAttribute("currentUser");
-        if (currentUser != null) {
-            agendaService.add(new Agenda(libelle, currentUser));
-            return "redirect:/agenda/home";
-        } else {
-            model.addAttribute("error", "Problème avec utilisateur = null");
-            return "home";
-        }
-
-    }
-
     @PostMapping("/signin")
     public String signin(
             HttpSession session,
@@ -106,8 +93,21 @@ public class MainController {
             return "redirect:/agenda/signin";
         } else {
             List<Agenda> agendas = agendaService.getUserAgenda(currentUser);
-            model.addAttribute("agenda", agendas);
+            model.addAttribute("agendas", agendas);
             return "home";
         }
+    }
+
+    @PostMapping("/addagenda")
+    public String addAgenda(HttpSession session, Model model, @RequestParam String libelle) {
+        Utilisateur currentUser = (Utilisateur) session.getAttribute("currentUser");
+        if (currentUser != null) {
+            agendaService.add(new Agenda(libelle, currentUser));
+            return "redirect:/agenda/home";
+        } else {
+            model.addAttribute("error", "Problème avec utilisateur = null");
+            return "home";
+        }
+
     }
 }
