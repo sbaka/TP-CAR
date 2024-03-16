@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imprimer Agenda</title>
+</head>
+
+<body>
+    <h1>Agenda [[${session.currentAgenda.libelle}]]</h1>
+    <p>Personne: [[${session.currentUser.nom}]] [[${session.currentUser.prenom}]] </p>
+
+    <table border="1px">
+        <thead>
+            <td>Libelle</td>
+            <td>Date</td>
+            <td>Horaires</td>
+        </thead>
+        <tr th:each="event : ${events}">
+            <td>[[${event.libelle }]]</td>
+            <td>[[${event.date }]]</td>
+            <td>[[${event.heurDebut }]] - [[${event.heurFin }]]</td>
+        </tr>
+    </table>
+</body>
+
+</html>

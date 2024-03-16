@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--http://localhost:8080/agenda/signup-->
+<!-- http://localhost:8080/agenda/signup -->
 
 <head>
     <meta charset="UTF-8">
@@ -10,7 +10,7 @@
 
 <body>
     <h2>S'enregistrer</h2>
-    <form action="/agenda/signup" method="post" style="display: flex;align-items: center;flex-direction: column;">
+    <form action="/agenda/user/signup" method="post" style="display: flex;align-items: center;flex-direction: column;">
         <div th:if="${error}" style="color: red;">
             <p th:text="${error}"></p>
         </div>
@@ -25,7 +25,7 @@
         <input type="submit" value="Enregistrer">
     </form>
     <div>
-        <p>Si vous avez déjà un compte <a href="http://localhost:8080/agenda/signin">Connectez-vous!</a></p>
+        <p>Si vous avez déjà un compte <a href="http://localhost:8080/agenda/user/signin">Connectez-vous!</a></p>
     </div>
 
 

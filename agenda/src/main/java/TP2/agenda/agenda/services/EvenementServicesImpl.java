@@ -18,4 +18,18 @@ public class EvenementServicesImpl implements EvenementServicesItf {
         return repo.findByAgendaId(agendaId);
     }
 
+    @Override
+    public void add(Evenement evenement) {
+        if (evenement != null) {
+            repo.save(evenement);
+        }
+    }
+
+    @Override
+    public void remove(Long id) {
+        if (id != null) {
+            repo.deleteById(id);
+        }
+    }
+
 }

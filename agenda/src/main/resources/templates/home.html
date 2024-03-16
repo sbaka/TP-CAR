@@ -10,8 +10,8 @@
 <body>
     <div
         style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; justify-items: center;">
-        <h1>Bienvenue</h1>
-        <form action="/agenda/signout" method="post">
+        <h1>Bienvenue, [[${currentUser.nom}]]!</h1>
+        <form action="/agenda/user/signout" method="post">
             <input type="submit" value="Se déconnecter">
         </form>
     </div>

@@ -9,7 +9,8 @@
 
 <body>
     <h1>S'identifier</h1>
-    <form action="/agenda/signin" method="post" style="display: flex; flex-direction: column; align-items: center;">
+    <form action="/agenda/user/signin" method="post"
+        style="display: flex; flex-direction: column; align-items: center;">
         <div th:if="${error}" style="color: red;">
             <p th:text="${error}"></p>
         </div>
@@ -21,7 +22,7 @@
         <br>
     </form>
     <div>
-        <p>Si vous n'avez pas encore un compte <a href="http://localhost:8080/agenda/signup">créez en un!</a></p>
+        <p>Si vous n'avez pas encore un compte <a href="http://localhost:8080/agenda/user/signup">créez en un!</a></p>
     </div>
 </body>
 

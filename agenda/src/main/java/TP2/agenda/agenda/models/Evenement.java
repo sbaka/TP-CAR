@@ -1,8 +1,5 @@
 package TP2.agenda.agenda.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.persistence.*;
 
 /**
@@ -12,24 +9,27 @@ import jakarta.persistence.*;
 public class Evenement {
     @Id
     @GeneratedValue
-    private long id;
+    private Long id;
     private String libelle;
+    private String date;
+    private String heurDebut;
+    private String heurFin;
 
     @ManyToOne
-    @JoinColumn(name = "agenda_id")
     private Agenda agenda;
-
-    @OneToMany(mappedBy = "evenement", orphanRemoval = true, cascade = CascadeType.REMOVE)
-    private List<Creneau> creneaux = new ArrayList<>();
 
     public Evenement() {
     }
 
-    public Evenement(String libelle) {
+    public Evenement(String libelle, String date, String heurDebut, String heurFin, Agenda agenda) {
         this.libelle = libelle;
+        this.date = date;
+        this.heurDebut = heurDebut;
+        this.heurFin = heurFin;
+        this.agenda = agenda;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -53,11 +53,27 @@ public class Evenement {
         this.agenda = agenda;
     }
 
-    public List<Creneau> getCreneaux() {
-        return creneaux;
+    public String getDate() {
+        return date;
     }
 
-    public void setCreneaux(List<Creneau> creneaux) {
-        this.creneaux = creneaux;
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getHeurFin() {
+        return heurFin;
+    }
+
+    public void setHeurFin(String heurFin) {
+        this.heurFin = heurFin;
+    }
+
+    public String getHeurDebut() {
+        return heurDebut;
+    }
+
+    public void setHeurDebut(String heurDebut) {
+        this.heurDebut = heurDebut;
     }
 }

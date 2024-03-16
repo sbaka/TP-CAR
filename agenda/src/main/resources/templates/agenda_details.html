@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda<details>
+    </title>
+</head>
+
+<body>
+    <h1>Bienvenue, [[${session.currentUser.nom}]]!</h1>
+    <a th:href="@{/agenda/}">Tous les agendas</a>
+    <h2>Agenda [[${session.currentAgenda.libelle}]]</h2>
+    <a th:href="@{/agenda/__${session.currentAgenda.id}__/imprimer}">imprimer</a>
+
+    <div>
+        <h3>Ajouter un evenement</h3>
+        <form action="/agenda/addEvent" method="post"
+            style="display: flex; flex-direction: column; align-items: start;">
+            <div th:if="${error}" style="color: red;">
+                <p th:text="${error}"></p>
+            </div>
+            <input type="text" name="libelle" placeholder="Libelle" required>
+            <br>
+            <input type="date" name="date" placeholder="Debut de l'evenement">
+            <br>
+            <input type="time" name="heurDebut" placeholder="Debut de l'evenement">
+            <br>
+            <input type="time" name="heurFin" placeholder="Fin de l'evenement">
+            <br>
+            <input type="submit" value="Ajouter">
+        </form>
+    </div>
+    <h3>Liste d'evenements</h3>
+    <ul th:each="event : ${events}">
+        <li>
+            <b>[[${event.libelle }]] :</b>
+            [[${event.date }]]
+            [[${event.heurDebut }]]
+            [[${event.heurFin }]]
+            <!-- <button id="deleteButton" th:attr="onclick=|handleDelete('${event.id}')|">Supprimer</button> -->
+            <form th:action="@{/agenda/__${session.currentAgenda.id}__/evenement/delete/__${event.id}__}"
+                th:method="delete">
+                <input type="submit" value="Supprimer">
+            </form>
+
+        </li>
+    </ul>
+</body>
+
+</html>
