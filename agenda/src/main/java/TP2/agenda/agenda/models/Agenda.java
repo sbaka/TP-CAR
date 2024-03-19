@@ -22,6 +22,14 @@ public class Agenda {
     @OneToMany(mappedBy = "agenda", orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<Evenement> evenements = new ArrayList<>();
 
+    public List<Evenement> getEvenements() {
+        return evenements;
+    }
+
+    public void setEvenements(List<Evenement> evenements) {
+        this.evenements = evenements;
+    }
+
     public Agenda() {
     }
 

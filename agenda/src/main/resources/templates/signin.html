@@ -5,24 +5,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S'identifier</title>
+    <link rel="icon" href="./assets/logo.ico" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 
 <body>
-    <h1>S'identifier</h1>
-    <form action="/agenda/user/signin" method="post"
-        style="display: flex; flex-direction: column; align-items: center;">
-        <div th:if="${error}" style="color: red;">
-            <p th:text="${error}"></p>
+    <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
+        <div class="card p-3 shadow">
+            <h1 class="text-center mb-4">S'identifier</h1>
+            <form action="/agenda/user/signin" method="post"
+                style="display: flex; flex-direction: column; align-items: center;">
+                <div th:if="${error}" class="alert alert-danger container" role="alert">
+                    <p class="m-0">[[${error}]]</p>
+                </div>
+                <div class="form-group mb-3 w-75">
+                    <input type="email" class="form-control" name="email" id="email" placeholder="name@example.com"
+                        required>
+                </div>
+                <div class="form-group mb-3 w-75">
+                    <input type="password" class="form-control" name="pwd" id="pwd" placeholder="Mot de passe" required>
+                </div>
+
+                <input type="submit" class="btn btn-primary mb-3" value="S'identifier">
+            </form>
+            <p class="text-center">
+                Si vous n'avez pas encore un compte <a href="http://localhost:8080/agenda/user/signup">créez
+                    en un!</a>
+            </p>
         </div>
-        <input type="email" name="email" id="email" placeholder="email" required>
-        <br>
-        <input type="password" name="pwd" id="pwd" placeholder="Mot de passe" required>
-        <br>
-        <input type="submit" value="S'identifier">
-        <br>
-    </form>
-    <div>
-        <p>Si vous n'avez pas encore un compte <a href="http://localhost:8080/agenda/user/signup">créez en un!</a></p>
     </div>
 </body>
 

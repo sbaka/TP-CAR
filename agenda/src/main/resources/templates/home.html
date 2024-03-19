@@ -4,32 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>Home</title>
 </head>
 
 <body>
-    <div
-        style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; justify-items: center;">
-        <h1>Bienvenue, [[${currentUser.nom}]]!</h1>
-        <form action="/agenda/user/signout" method="post">
-            <input type="submit" value="Se déconnecter">
-        </form>
+    <div class="pt-4 pl-4 pr-4">
+        <div class="sticky-top d-flex justify-content-between align-items-center ">
+            <h1>Bienvenue, [[${currentUser.nom}]]!</h1>
+            <form action="/agenda/user/signout" method="post">
+                <input type="submit" class="btn btn-primary" value="Se déconnecter">
+            </form>
+
+        </div>
+        <hr>
     </div>
-    <div>
-        <h2>Ajouter des agendas</h2>
-        <form action="/agenda/addagenda" method="post">
-            <div th:if="${error}" style="color: red;">
-                <p th:text="${error}"></p>
+
+    <div class="sticky-bottom fixed-bottom w-100" style="height: 12%;">
+        <form action="/agenda/addagenda" method="post"
+            class="d-flex justify-content-center align-items-center flex-row">
+            <h4>Ajouter un agenda</h4>
+            <div class="form-floating mb-3 w-75 d-flex flex-row h-100">
+                <input type="text" style="height: 4rem;" class="form-control ml-4 mr-2" name="libelle"
+                    placeholder="Libelle" required>
             </div>
-            <input type="text" name="libelle" placeholder="Libelle" required>
-            <input type="submit" value="Ajouter">
+            <div>
+                <input type="submit" class="btn btn-primary" value="Ajouter">
+            </div>
         </form>
     </div>
-    <div>
-        <h2>Liste des agendas</h2>
-        <ul th:each="agenda : ${agendas}">
-            <li><a th:href="${'/agenda/details/' + agenda.id}" th:text="${agenda.libelle}" name="agenda"></a></li>
-        </ul>
+    <div class="pl-4 pr-4 vh-75">
+        <h2>Vos agendas</h2>
+        <div class="d-flex justify-content-center p-4 container-fluid" style="height: 65vh; overflow-y: auto;">
+            <table class="table table-bordered rounded" style="height: fit-content;">
+                <thead class="bg-light" style="height: fit-content;">
+                    <th class="col-md-4">Libelle</th>
+                    <th class="col-md-6">Contient</th>
+                    <th>Action</th>
+                </thead>
+                <tbody th:each="agenda : ${agendas}">
+                    <td>
+                        <b><a th:href="${'/agenda/details/' + agenda.id}" name="agenda">[[${agenda.libelle}]]</a></b>
+                    </td>
+                    <td> [[${agenda.evenements.size()}]] événement(s)</td>
+                    <td>
+                        <button class="btn btn-danger">Supprimer</button>
+                    </td>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 
