@@ -12,9 +12,9 @@
 <body>
     <div class="pt-4 pl-4 pr-4">
         <div class="sticky-top d-flex justify-content-between align-items-center ">
-            <h1>Bienvenue, [[${currentUser.nom}]]!</h1>
+            <h1>Bienvenue, [[${username}]]!</h1>
             <form action="/agenda/user/signout" method="post">
-                <input type="submit" class="btn btn-primary" value="Se déconnecter">
+                <input type="submit" class="btn btn-outline-danger" value="Se déconnecter">
             </form>
 
         </div>
@@ -49,7 +49,9 @@
                     </td>
                     <td> [[${agenda.evenements.size()}]] événement(s)</td>
                     <td>
-                        <button class="btn btn-danger">Supprimer</button>
+                        <form th:action="@{/agenda/delete/__${agenda.id}__}" th:method="delete">
+                            <input type="submit" class="btn btn-outline-danger" value="Supprimer">
+                        </form>
                     </td>
                 </tbody>
             </table>

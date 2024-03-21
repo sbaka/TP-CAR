@@ -2,6 +2,7 @@ package TP2.agenda.agenda.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,23 @@ public class AgendaController {
         return "redirect:/agenda/home";
     }
 
+    @DeleteMapping("/delete/{id}")
+    public String deleteEvenement(HttpSession session, Model model, @PathVariable Long id) {
+
+        Utilisateur currentUser = (Utilisateur) session.getAttribute("currentUser");
+        if (currentUser != null) {
+            agendaService.remove(id);
+            List<Agenda> agendas = agendaService.getUserAgenda(currentUser);
+            model.addAttribute("agendas", agendas);
+            return "redirect:/agenda/home";
+        } else {
+            // TODO: this should display an error before redirecting
+            model.addAttribute("error", "Vous devez être connecté pour accéder aux détails de l'agenda.");
+            return "redirect:/agenda/user/signin";
+        }
+
+    }
+
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
         Utilisateur currentUser = (Utilisateur) session.getAttribute("currentUser");
@@ -47,7 +65,8 @@ public class AgendaController {
             return "redirect:/agenda/user/signin";
         } else {
             List<Agenda> agendas = agendaService.getUserAgenda(currentUser);
-            model.addAttribute("currentUser", currentUser);
+            // ajouter le nom d'utilisateur dans le username
+            model.addAttribute("username", currentUser.getNom());
             model.addAttribute("agendas", agendas);
             return "home";
         }

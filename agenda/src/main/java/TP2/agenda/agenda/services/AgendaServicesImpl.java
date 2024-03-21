@@ -23,6 +23,13 @@ public class AgendaServicesImpl implements AgendaServicesItf {
     }
 
     @Override
+    public void remove(Long id) {
+        if (id != null) {
+            repo.deleteById(id);
+        }
+    }
+
+    @Override
     public List<Agenda> getUserAgenda(Utilisateur utilisateur) {
         return repo.findByUtilisateur(utilisateur);
     }

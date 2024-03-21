@@ -9,6 +9,8 @@ import TP2.agenda.agenda.models.Utilisateur;
 public interface AgendaServicesItf {
     public void add(Agenda agenda);
 
+    public void remove(Long id);
+
     public Optional<Agenda> getAgendaById(Long id);
 
     public List<Agenda> getUserAgenda(Utilisateur utilisateur);
