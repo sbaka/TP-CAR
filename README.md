@@ -9,13 +9,6 @@
 
 Naviguer dans les dossiers pour voir la doc concernant les different TP.
 
-## Usage
-
-Pour utiliser le serveur FTP:
-
-```sh
-java -jar TP1/TP1_ABDELLATIF_KBR.jar
-```
 
 ## Author
 
