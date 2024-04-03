@@ -18,9 +18,6 @@ repositories {
     }
 }
 
-def versions = [
-  ScalaBinary: "2.12"
-]
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -28,10 +25,10 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	// Akka
-	implementation platform("com.typesafe.akka:akka-bom_${versions.ScalaBinary}:2.4.14")
-	implementation "com.typesafe.akka:akka-remote_${versions.ScalaBinary}:2.4.14"
-	implementation "com.typesafe.akka:akka-actor-typed_${versions.ScalaBinary}"
-  	testImplementation "com.typesafe.akka:akka-actor-testkit-typed_${versions.ScalaBinary}"
+	implementation 'com.typesafe.akka:akka-stream_2.12:2.4.14'
+	implementation 'com.typesafe.akka:akka-remote_2.12:2.4.14'
+	implementation 'com.typesafe.akka:akka-actor_2.12:2.4.14'
+
 }
 
 tasks.named('test') {

@@ -15,7 +15,7 @@
 
     <div>
         <h3>Initialisation des acteurs Akka</h3>
-        <form action="/init-akka" method="get">
+        <form action="/mapreduce/init-akka" method="get">
             <input type="submit" value="submit">
         </form>
     </div>
@@ -23,9 +23,9 @@
     <div>
         <h3>Fichier à analyser</h3>
         <span class="d-flex flex-row">
-            <form action="/file_handler" method="post">
-                Fichier: <input type="file" name="choisir un fichier" class="ps-3" id="id"
-                    placeholder="choisir un fichier">
+            <form action="/mapreduce/file_upload_handler" method="post" enctype="multipart/form-data">
+                Fichier:
+                <input type="file" name="file" class="ps-3" id="file" placeholder="choisir un fichier" accept=".txt">
                 <input type="submit" value="submit">
             </form>
         </span>
@@ -36,11 +36,11 @@
             <p>Mot:</p>
             <p>Nombre d'occurrences:</p>
         </div>
-        <form action="/mot" method="get">
-            <label for="Nom">
+        <form action="/mapreduce/count" method="get">
+            <label for="mot">
                 Mot:
             </label>
-            <input type="text" name="Nom" id="Nom">
+            <input type="text" name="mot" id="mot">
             <input type="submit" value="submit">
         </form>
     </div>
