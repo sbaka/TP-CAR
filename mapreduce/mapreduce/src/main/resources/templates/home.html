@@ -25,22 +25,23 @@
         <span class="d-flex flex-row">
             <form action="/mapreduce/file_upload_handler" method="post" enctype="multipart/form-data">
                 Fichier:
-                <input type="file" name="file" class="ps-3" id="file" placeholder="choisir un fichier" accept=".txt">
+                <input type="file" name="file" class="ps-3" id="file" placeholder="choisir un fichier" accept=".txt"
+                    required>
                 <input type="submit" value="submit">
             </form>
         </span>
     </div>
     <div>
         <h3>Résultat</h3>
-        <div>
-            <p>Mot:</p>
-            <p>Nombre d'occurrences:</p>
+        <div th:if="${mot}">
+            <p>mot: [[${mot}]]</p>
+            <p>Nb d'occurrence: [[${count}]]</p>
         </div>
-        <form action="/mapreduce/count" method="get">
+        <form action="/mapreduce/count" method="post">
             <label for="mot">
                 Mot:
             </label>
-            <input type="text" name="mot" id="mot">
+            <input type="text" name="mot" id="mot" required>
             <input type="submit" value="submit">
         </form>
     </div>

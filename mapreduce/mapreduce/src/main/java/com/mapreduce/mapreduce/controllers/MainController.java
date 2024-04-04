@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,9 +31,12 @@ public class MainController {
     }
 
     // Add a REST endpoint to retrieve word counts
-    @GetMapping("/count/{mot}")
-    public int getWordCount(@PathVariable String mot) {
-        return akkaService.getWordCount(mot);
+    @PostMapping("/count")
+    public String getWordCount(@RequestParam String mot, Model model) {
+        System.out.println("mot: " + mot);
+        model.addAttribute("mot", mot);
+        model.addAttribute("count", akkaService.getWordCount(mot));
+        return "home";
     }
 
     @PostMapping("/file_upload_handler")
@@ -42,13 +45,12 @@ public class MainController {
             byte[] bytes = file.getBytes();
             String fileContent = new String(bytes);
             String[] lines = fileContent.split("\n");
-            System.out.println(" content: " + lines.length);
             akkaService.digestFile(lines);
         } catch (IOException e) {
             System.err.println("Error uploading file: " + e);
             throw new RuntimeException("File upload failed");
         }
 
-        return "redirect:/mapreduce/";
+        return "home";
     }
 }
